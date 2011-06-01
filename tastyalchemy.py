@@ -1,9 +1,9 @@
+from sqlalchemy import (Boolean, Date, DateTime, Integer,
+                        String, Unicode, UnicodeText)
 from tastypie import fields
 from tastypie.bundle import Bundle
 from tastypie.exceptions import NotFound
 from tastypie.resources import Resource
-from sqlalchemy import (Boolean, Date, DateTime, Integer,
-                        String, Unicode, UnicodeText)
 
 FIELD_MAP = {
     Boolean: fields.BooleanField,
@@ -22,8 +22,12 @@ class SQLAlchemyResource(Resource):
         super(SQLAlchemyResource, self).__init__(api_name)
         for col in self._meta.object_class.__table__.columns:
             if col.name not in self._meta.excludes:
+                kwargs = {
+                    'attribute': col.name,
+                    'null': col.nullable,
+                }
                 self.fields[col.name] = FIELD_MAP.get(col.type.__class__,
-                    fields.CharField)(attribute=col.name)
+                    fields.CharField)(**kwargs)
 
     def get_resource_uri(self, bundle_or_obj):
         kwargs = {
